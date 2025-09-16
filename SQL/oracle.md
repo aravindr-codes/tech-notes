@@ -1,9 +1,15 @@
-# 🗄️ Db2 SQL Quick Reference
+
+---
+
+# 📘 Oracle SQL Quick Reference
+
+```markdown
+# 🗄️ Oracle SQL Quick Reference
 
 ## 📌 DDL (Data Definition Language)
-- `CREATE TABLE employees (id INT PRIMARY KEY, name VARCHAR(50), salary DECIMAL(10,2));`
-- `ALTER TABLE employees ADD COLUMN department VARCHAR(50);`
-- `DROP TABLE employees;`
+- `CREATE TABLE employees (id NUMBER PRIMARY KEY, name VARCHAR2(50), salary NUMBER(10,2));`
+- `ALTER TABLE employees ADD (department VARCHAR2(50));`
+- `DROP TABLE employees CASCADE CONSTRAINTS;`
 - `CREATE INDEX idx_emp_name ON employees(name);`
 - `DROP INDEX idx_emp_name;`
 
@@ -14,6 +20,9 @@
 - `SELECT * FROM employees;`
 - `UPDATE employees SET salary = 60000 WHERE id = 1;`
 - `DELETE FROM employees WHERE id = 1;`
+- `MERGE INTO employees e USING new_employees n ON (e.id = n.id) 
+   WHEN MATCHED THEN UPDATE SET e.salary = n.salary 
+   WHEN NOT MATCHED THEN INSERT (id, name, salary) VALUES (n.id, n.name, n.salary);`
 
 ---
 
@@ -42,7 +51,4 @@ RIGHT JOIN departments d ON e.department = d.id;
 -- FULL OUTER JOIN: Everything, even if no match
 SELECT e.name, e.salary, d.dept_name
 FROM employees e
-FULL JOIN departments d ON e.department = d.id;
-📚 References
-
-IBM Db2 SQL Reference
+FULL OUTER JOIN departments d ON e.department = d.id;
