@@ -88,4 +88,143 @@ df1.join(df2, df1.id == df2.id, "outer").show()   # Full Outer Join
 
 
 
+# ⚡ PySpark Advanced Concepts
+
+## ⚙️ Partitioning & Performance
+```python
+# Repartition (shuffle-based, more expensive)
+df = df.repartition(10)
+
+# Coalesce (reduce partitions, cheaper)
+df = df.coalesce(2)
+
+# Inspect partitions
+df.rdd.getNumPartitions()
+````
+
+👉 Use repartitioning to optimize joins and shuffles.
+
+---
+
+## 🔄 Caching & Persistence
+
+```python
+df.cache()         # Store in memory
+df.persist()       # Store in memory/disk (default: MEMORY_AND_DISK)
+df.unpersist()     # Remove from cache
+```
+
+👉 Useful when reusing DataFrames across multiple actions.
+
+---
+
+## 🧮 Window Functions
+
+```python
+from pyspark.sql.window import Window
+from pyspark.sql.functions import row_number, rank, dense_rank
+
+w = Window.partitionBy("department").orderBy("salary")
+
+df.withColumn("row_num", row_number().over(w)).show()
+df.withColumn("rank", rank().over(w)).show()
+```
+
+👉 Great for ranking, running totals, moving averages.
+
+---
+
+## 🏎️ Broadcast Joins
+
+```python
+from pyspark.sql.functions import broadcast
+
+df_large.join(broadcast(df_small), "id").show()
+```
+
+👉 Avoids expensive shuffles when one dataset is small.
+
+---
+
+## 🐍 User-Defined Functions (UDFs)
+
+```python
+from pyspark.sql.functions import udf
+from pyspark.sql.types import IntegerType
+
+def add_one(x): 
+    return x + 1
+
+add_one_udf = udf(add_one, IntegerType())
+df.withColumn("age_plus_one", add_one_udf(df.age)).show()
+```
+
+⚠️ UDFs can be slow — prefer **pandas UDFs** or built-in functions.
+
+---
+
+## 🐼 Pandas UDFs (Vectorized UDFs)
+
+```python
+from pyspark.sql.functions import pandas_udf
+
+@pandas_udf("double")
+def multiply_by_two(v):
+    return v * 2
+
+df.withColumn("double_salary", multiply_by_two(df.salary)).show()
+```
+
+👉 Much faster than normal UDFs, since they use Apache Arrow.
+
+---
+
+## 📤 Writing Optimized Data
+
+```python
+# Partitioned write
+df.write.partitionBy("year", "month").parquet("output/")
+
+# Bucketed write (requires Hive support)
+df.write.bucketBy(8, "id").sortBy("id").saveAsTable("bucketed_table")
+```
+
+---
+
+## 🔗 Joins Optimization
+
+* Use **broadcast joins** for small lookup tables.
+* Ensure join keys are distributed evenly (avoid skew).
+* Repartition on join keys before large joins:
+
+  ```python
+  df1 = df1.repartition("id")
+  df2 = df2.repartition("id")
+  df1.join(df2, "id")
+  ```
+
+---
+
+## 🛠️ Common Performance Tips
+
+* Prefer **DataFrame API** over RDD API (optimized via Catalyst).
+* Minimize **shuffles** (joins, groupBy, distinct).
+* Use `explain()` to view query plan:
+
+  ```python
+  df.groupBy("department").count().explain(True)
+  ```
+* Push filters early (`filter` before `join`).
+* Use **Parquet/ORC** instead of CSV for storage (columnar, compressed).
+
+---
+
+## 📚 References
+
+* [Optimizing Spark](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
+* [Databricks Performance Guide](https://docs.databricks.com/optimizations/)
+
+
+
+
 
