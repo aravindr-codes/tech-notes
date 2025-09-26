@@ -5,5 +5,6 @@ A personal quick reference repo with commands, concepts, and examples for variou
 ## Index
 
 - [Docker](./docker/README.md)
+- [mongodb]
 
 > ⚠️ These are personal learning notes. They may not always reflect the latest best practices.
